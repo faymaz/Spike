@@ -815,7 +815,11 @@ while IFS= read -d '' -r app;
 do
     log "Resigning nested application: '$app'"
     resign "$app" NESTED
-done < <(find "$TEMP_DIR/Payload/$APP_NAME" -d -mindepth 1 \( -name "*.app" -or -name "*.appex" \) -print0)
+    
+find "$TEMP_DIR/Payload/$APP_NAME" -d -mindepth 1 \( -name "*.app" -or -name "*.appex" \) -print0 > /tmp/spike_find_output
+while IFS= read -r -d '' file; do
+    # Your code to process each file goes here
+done < /tmp/spike_find_output
 
 # Resign the application
 resign "$TEMP_DIR/Payload/$APP_NAME"
