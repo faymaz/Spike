@@ -70,7 +70,7 @@ do
             exit 0
             break
             ;;
-        *) 
+        *)
     esac
 done
 
@@ -103,7 +103,7 @@ do
             exit 0
             break
             ;;
-        *) 
+        *)
     esac
 done
 
@@ -130,7 +130,7 @@ if [ $SHOULD_DOWNLOAD = "true" ]; then
                 exit 0
                 break
                 ;;
-            *) 
+            *)
         esac
     done
 else
@@ -233,7 +233,7 @@ select answer in "${choices[@]}"; do
         fi
     done
 done
-    
+
 CODE_SIGN_IDENTITY="$answer"
 
 if [ "$CODE_SIGN_IDENTITY" = "" ]; then
@@ -363,16 +363,16 @@ do
     # Get the common name (CN) from the certificate (regex capture between 'CN=' and '/OU'):
     MOBILEPROVISION_IDENTITY_NAME=`openssl x509 -inform DER -in $TEMP_CERTIFICATE_PATH -subject -noout | perl -n -e '/CN=(.+)\/OU/ && print "$1"'`
 
-        # commented out, because this check often led to errors.		
+        # commented out, because this check often led to errors.
 	#if [ "$CODE_SIGN_IDENTITY" = "$MOBILEPROVISION_IDENTITY_NAME" ]; then
         # Yay, this mobile provisioning profile matches up with the selected signing identity, let's continue...
         # Get the name of the provisioning profile:
-        MOBILEPROVISION_PROFILE_NAME=`/usr/libexec/PlistBuddy -c 'Print Name' $TEMP_MOBILEPROVISION_PLIST_PATH`			
+        MOBILEPROVISION_PROFILE_NAME=`/usr/libexec/PlistBuddy -c 'Print Name' $TEMP_MOBILEPROVISION_PLIST_PATH`
 
         #Find corresponding app/extension
 		if [ "$SPIKE_DEVICE_VERSION" = "iPad" ]; then
 			if [[ "$MOBILEPROVISION_PROFILE_NAME" == *spikeipad.watchkitapp.watchkitextension ]]; then
-	            FOUND_WATCH_EXTENSION_MOBILEPROVISION=true 
+	            FOUND_WATCH_EXTENSION_MOBILEPROVISION=true
 	            cp $MOBILEPROVISION_FILENAME "${SCRIPT_DIR}/${MOBILE_PROVISION_FILES_DIR}/watchkitextension.mobileprovision"
 			elif [[ "$MOBILEPROVISION_PROFILE_NAME" == *spikeipad.watchkitapp ]]; then
 	            FOUND_WATCH_APP_MOBILEPROVISION=true
@@ -397,7 +397,7 @@ do
 			fi
 		else
 			if [[ "$MOBILEPROVISION_PROFILE_NAME" == *spike.watchkitapp.watchkitextension ]]; then
-	            FOUND_WATCH_EXTENSION_MOBILEPROVISION=true 
+	            FOUND_WATCH_EXTENSION_MOBILEPROVISION=true
 	            cp $MOBILEPROVISION_FILENAME "${SCRIPT_DIR}/${MOBILE_PROVISION_FILES_DIR}/watchkitextension.mobileprovision"
 			elif [[ "$MOBILEPROVISION_PROFILE_NAME" == *spike.watchkitapp ]]; then
 	            FOUND_WATCH_APP_MOBILEPROVISION=true
@@ -785,7 +785,7 @@ function resign {
 
             log "Added iCloud service entitlements"
         fi
-    fi 
+    fi
 
     log "Resigning application using certificate: '$CERTIFICATE'"
     log "and entitlements from provisioning profile: $NEW_PROVISION"
@@ -809,18 +809,28 @@ function resign {
     rm -f "$TEMP_DIR/old-embedded.mobileprovision"
     rm -f "$TEMP_DIR/oldInfo.plist"
 }
-
+#######
 # Sign nested applications and app extensions
-while IFS= read -d '' -r app;
-do
-    log "Resigning nested application: '$app'"
-    resign "$app" NESTED
-    
+#while IFS= read -d '' -r app;
+#do
+#    log "Resigning nested application: '$app'"
+#    resign "$app" NESTED
+#done < <(find "$TEMP_DIR/Payload/$APP_NAME" -d -mindepth 1 \( -name "*.app" -or -name "*.appex" \) -print0)
+
+# Save the find output to a temporary file
 find "$TEMP_DIR/Payload/$APP_NAME" -d -mindepth 1 \( -name "*.app" -or -name "*.appex" \) -print0 > /tmp/spike_find_output
+
+# Process each line from the find output
 while IFS= read -r -d '' file; do
-    # Your code to process each file goes here
+    # Your code to process each file
+    echo "Processing $file"
 done < /tmp/spike_find_output
 
+# Clean up temporary file
+rm -f /tmp/spike_find_output
+
+
+###########
 # Resign the application
 resign "$TEMP_DIR/Payload/$APP_NAME"
 
